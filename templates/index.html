@@ -4,119 +4,252 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Credential Extractor</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" defer></script>
 <style>
   :root {
-    --bg: #f6f7f9; --card: #ffffff; --text: #18202b; --muted: #5b6575; --border: #dde2ea;
-    --accent: #1f5fbf; --ok: #1d7a46; --warn: #a15c00; --bad: #b42318; --code: #f0f2f5;
+    --bg: #f5f6f8; --card: #ffffff; --text: #17202b; --muted: #5b6575; --border: #dde2ea; --soft: #f0f2f5;
+    --accent: #1f5fbf; --accent-soft: #e6eefb; --ok: #1d7a46; --ok-soft: #e3f4ea; --warn: #9a5800; --warn-soft: #fdf0dc;
+    --bad: #b42318; --bad-soft: #fde7e5; --neutral-soft: #eceff3;
     color-scheme: light;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #11151b; --card: #1a2029; --text: #e6e9ee; --muted: #9aa4b2; --border: #2c3542;
-      --accent: #6aa1ff; --ok: #4cc283; --warn: #f0a640; --bad: #ff6b5e; --code: #141920;
+      --bg: #0f1318; --card: #181e26; --text: #e6e9ee; --muted: #9aa4b2; --border: #2a3340; --soft: #131820;
+      --accent: #6aa1ff; --accent-soft: #1b2a42; --ok: #4cc283; --ok-soft: #15301f; --warn: #f0a640; --warn-soft: #3a2a12;
+      --bad: #ff6b5e; --bad-soft: #3d1a17; --neutral-soft: #222a35;
       color-scheme: dark;
     }
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
-  main { max-width: 760px; margin: 0 auto; padding: 32px 16px 64px; }
-  h1 { font-size: 1.5rem; margin: 0 0 4px; }
-  p.lead { color: var(--muted); margin: 0 0 24px; }
-  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
-  .drop { display: block; border: 2px dashed var(--border); border-radius: 10px; padding: 28px 16px; text-align: center; cursor: pointer; transition: border-color .15s; }
-  .drop:hover, .drop.drag { border-color: var(--accent); }
+  main { max-width: 1180px; margin: 0 auto; padding: 28px 16px 64px; }
+  header { margin-bottom: 20px; }
+  h1 { font-size: 1.45rem; margin: 0 0 2px; }
+  h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 0 0 10px; font-weight: 600; }
+  .lead { color: var(--muted); margin: 0; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; }
+  .stack { display: grid; gap: 16px; }
+
+  /* Input */
+  .input-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px; }
+  .drop { display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 120px; border: 2px dashed var(--border);
+          border-radius: 10px; padding: 16px; text-align: center; cursor: pointer; transition: border-color .15s, background .15s; }
+  .drop:hover, .drop.drag { border-color: var(--accent); background: var(--accent-soft); }
   .drop strong { color: var(--accent); }
-  .drop .file { margin-top: 8px; color: var(--muted); font-size: .9rem; word-break: break-all; }
+  .drop .file { margin-top: 4px; color: var(--muted); font-size: .88rem; word-break: break-all; }
   input[type=file] { display: none; }
-  .row { display: flex; gap: 12px; align-items: end; flex-wrap: wrap; margin-top: 16px; }
+  .controls { display: flex; flex-direction: column; gap: 12px; justify-content: space-between; }
   label.field { display: flex; flex-direction: column; gap: 4px; font-size: .85rem; color: var(--muted); }
   input[type=date] { font: inherit; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); }
-  button { font: inherit; font-weight: 600; padding: 9px 18px; border: 0; border-radius: 8px; background: var(--accent); color: #fff; cursor: pointer; }
+  button { font: inherit; font-weight: 600; padding: 10px 18px; border: 0; border-radius: 8px; background: var(--accent); color: #fff; cursor: pointer; }
   button:disabled { opacity: .5; cursor: default; }
-  button.ghost { background: transparent; color: var(--accent); border: 1px solid var(--border); padding: 6px 12px; font-weight: 500; }
-  .hint { font-size: .8rem; color: var(--muted); margin-top: 12px; }
-  .status { display: inline-block; padding: 3px 10px; border-radius: 999px; font-weight: 600; font-size: .85rem; color: #fff; }
-  .s-valid { background: var(--ok); } .s-expiring_soon { background: var(--warn); } .s-expired { background: var(--bad); }
-  .s-no_expiration { background: var(--muted); } .s-none { background: var(--muted); }
-  table { width: 100%; border-collapse: collapse; margin-top: 12px; }
-  td { padding: 7px 0; border-bottom: 1px solid var(--border); vertical-align: top; }
-  td:first-child { color: var(--muted); width: 42%; padding-right: 12px; }
+  .hint { font-size: .8rem; color: var(--muted); margin: 0; }
+  .samples { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { font-weight: 500; font-size: .85rem; padding: 5px 12px; border-radius: 999px; border: 1px solid var(--border); background: var(--soft); color: var(--text); }
+  .chip:hover:not(:disabled) { border-color: var(--accent); }
+  .chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  /* Workspace */
+  .workspace { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 16px; margin-top: 16px; align-items: start; }
+  .preview { position: sticky; top: 16px; }
+  .preview-head { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; margin-bottom: 10px; }
+  .preview-head .name { font-weight: 600; word-break: break-all; }
+  .preview-head .size { color: var(--muted); font-size: .82rem; white-space: nowrap; }
+  .frame { background: var(--soft); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; height: min(78vh, 880px); display: flex; align-items: center; justify-content: center; }
+  .frame iframe { width: 100%; height: 100%; border: 0; background: #fff; }
+  .frame img, .frame canvas { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
+  .empty { color: var(--muted); text-align: center; padding: 24px; font-size: .9rem; }
+
+  /* Result */
+  .result-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .verdict { font-size: 1.1rem; font-weight: 700; }
+  .badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 999px; font-weight: 600; font-size: .85rem; }
+  .badge::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+  .b-valid { background: var(--ok-soft); color: var(--ok); }
+  .b-expiring_soon { background: var(--warn-soft); color: var(--warn); }
+  .b-expired { background: var(--bad-soft); color: var(--bad); }
+  .b-no_expiration, .b-none { background: var(--neutral-soft); color: var(--muted); }
+  .notice { margin-top: 12px; padding: 10px 14px; border-radius: 8px; font-size: .9rem; }
+  .notice.neutral { background: var(--neutral-soft); }
+  .notice.warn { background: var(--warn-soft); border-left: 3px solid var(--warn); }
+  .notice.bad { background: var(--bad-soft); color: var(--bad); font-weight: 600; }
+  .notice ul { margin: 4px 0 0; padding-left: 18px; }
+  .score { margin-top: 12px; font-size: .9rem; font-weight: 600; }
+  .score.all { color: var(--ok); } .score.some { color: var(--warn); }
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: .92rem; }
+  td { padding: 8px 0; border-bottom: 1px solid var(--border); vertical-align: top; }
+  td.key { color: var(--muted); width: 38%; padding-right: 12px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .82rem; padding-top: 10px; }
+  td.val { word-break: break-word; }
   td.null { color: var(--muted); font-style: italic; }
-  .warnings { margin-top: 14px; padding: 10px 14px; border-left: 3px solid var(--warn); background: var(--code); border-radius: 6px; }
-  .warnings ul { margin: 4px 0 0; padding-left: 18px; }
-  .error { color: var(--bad); font-weight: 600; }
-  pre { background: var(--code); border-radius: 8px; padding: 14px; overflow-x: auto; font-size: .82rem; margin: 10px 0 0; }
-  .meta { color: var(--muted); font-size: .82rem; margin-top: 10px; }
-  .head { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
-  .samples { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-  .chip { font: inherit; font-size: .85rem; padding: 5px 12px; border-radius: 999px; border: 1px solid var(--border); background: var(--code); color: var(--text); cursor: pointer; }
-  .chip:hover { border-color: var(--accent); }
-  .chip:disabled { opacity: .5; cursor: default; }
-  td.check { width: 28px; text-align: center; font-weight: 700; }
+  td.check { width: 26px; text-align: right; font-weight: 700; }
   td.match { color: var(--ok); } td.miss { color: var(--bad); }
-  .score { font-size: .9rem; color: var(--muted); margin-top: 8px; }
+  .expected { display: block; color: var(--bad); font-size: .8rem; }
+  details { margin-top: 14px; }
+  summary { cursor: pointer; color: var(--muted); font-size: .88rem; }
+  .json-head { display: flex; justify-content: flex-end; margin-top: 8px; }
+  button.ghost { background: transparent; color: var(--accent); border: 1px solid var(--border); padding: 5px 12px; font-weight: 500; font-size: .85rem; }
+  pre { background: var(--soft); border-radius: 8px; padding: 12px; overflow-x: auto; font-size: .8rem; margin: 6px 0 0; }
+  .meta { color: var(--muted); font-size: .8rem; margin-top: 12px; }
+  .loading { display: flex; align-items: center; gap: 12px; color: var(--muted); padding: 24px 4px; }
+  .spinner { width: 20px; height: 20px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
   [hidden] { display: none !important; }
+
+  @media (max-width: 860px) {
+    .input-grid, .workspace { grid-template-columns: 1fr; }
+    .preview { position: static; }
+    .frame { height: 60vh; }
+  }
 </style>
 </head>
 <body>
 <main>
-  <h1>Credential Extractor</h1>
-  <p class="lead">Upload a medical license or certification (PDF or image) and get its key fields as JSON.</p>
+  <header>
+    <h1>Credential Extractor</h1>
+    <p class="lead">Upload a medical license or certification and get its key fields as JSON, with expiration status and review warnings.</p>
+  </header>
 
-  <form class="card" id="form">
-    <label class="drop" id="drop" for="file">
-      <div><strong>Choose a file</strong> or drop it here</div>
-      <div class="file" id="fileName">PDF, PNG, JPG or WEBP, up to 10 MB</div>
-    </label>
-    <input type="file" id="file" name="file" accept=".pdf,.png,.jpg,.jpeg,.webp">
-    <div class="row">
-      <label class="field">Reference date for expiration status
-        <input type="date" id="refDate" name="reference_date">
-      </label>
-      <button type="submit" id="submit" disabled>Extract</button>
-    </div>
-    <p class="hint">Demo only: please do not upload real personal or health data. Documents are processed in memory and not stored. The eval uses reference date 2026-11-01.</p>
-  </form>
+  <div class="stack">
+    <form class="card" id="form">
+      <div class="input-grid">
+        <label class="drop" id="drop" for="file">
+          <div><strong>Choose a file</strong> or drop it here</div>
+          <div class="file" id="fileName">PDF, PNG, JPG or WEBP, up to 10 MB</div>
+        </label>
+        <div class="controls">
+          <label class="field">Reference date for expiration status
+            <input type="date" id="refDate" name="reference_date" required>
+          </label>
+          <button type="submit" id="submit" disabled>Extract</button>
+          <p class="hint">Demo: do not upload real personal or health data. Files are processed in memory and never stored.</p>
+        </div>
+      </div>
+      <input type="file" id="file" name="file" accept=".pdf,.png,.jpg,.jpeg,.webp">
+    </form>
 
-  <section class="card">
-    <strong>Quick test with the challenge samples</strong>
-    <div class="hint" style="margin-top:4px">Runs the extractor on a sample with the eval reference date (2026-11-01) and checks each field against its expected output.</div>
-    <div class="samples" id="samples"></div>
-  </section>
+    <section class="card">
+      <h2>Quick test with the challenge samples</h2>
+      <div class="samples" id="samples"></div>
+      <p class="hint" style="margin-top:10px">One click runs the extractor with the eval reference date (2026-11-01) and checks every field against the expected output.</p>
+    </section>
+  </div>
 
-  <section class="card" id="output" hidden>
-    <div class="head">
-      <strong id="summary"></strong>
-      <span class="status" id="status"></span>
-    </div>
-    <div class="score" id="score" hidden></div>
-    <table id="fields"></table>
-    <div class="warnings" id="warnings" hidden><strong>Needs review</strong><ul id="warningList"></ul></div>
-    <div class="head" style="margin-top:16px">
-      <strong>JSON</strong>
-      <button type="button" class="ghost" id="copy">Copy</button>
-    </div>
-    <pre id="json"></pre>
-    <div class="meta" id="meta"></div>
-  </section>
+  <div class="workspace" id="workspace" hidden>
+    <section class="card preview">
+      <div class="preview-head">
+        <span class="name" id="previewName"></span>
+        <span class="size" id="previewSize"></span>
+      </div>
+      <div class="frame" id="frame"></div>
+    </section>
 
-  <p class="error" id="error" hidden></p>
+    <section class="card" id="panel">
+      <div class="empty" id="idle">Press <strong>Extract</strong> to read this document.</div>
+      <div class="loading" id="loading" hidden><div class="spinner"></div><span id="loadingText">Reading the document…</span></div>
+      <div class="notice bad" id="error" hidden></div>
+      <div id="output" hidden>
+        <div class="result-head">
+          <span class="verdict" id="verdict"></span>
+          <span class="badge" id="status"></span>
+        </div>
+        <div class="notice neutral" id="notCredential" hidden>This document does not grant a license or certification, so every field is null.</div>
+        <div class="score" id="score" hidden></div>
+        <table id="fields"></table>
+        <div class="notice warn" id="warnings" hidden><strong>Needs human review</strong><ul id="warningList"></ul></div>
+        <details>
+          <summary>Raw JSON</summary>
+          <div class="json-head"><button type="button" class="ghost" id="copy">Copy</button></div>
+          <pre id="json"></pre>
+        </details>
+        <div class="meta" id="meta"></div>
+      </div>
+    </section>
+  </div>
 </main>
 <script>
   const $ = (id) => document.getElementById(id);
   const FIELDS = ["is_credential", "holder_name", "credential_type", "license_number", "issuing_authority", "issue_date", "expiration_date", "expiration_status"];
   const STATUS = { valid: "Valid", expiring_soon: "Expiring soon", expired: "Expired", no_expiration: "No expiration" };
+  let expected = null;   // set only while a sample is being tested
+  let previewUrl = null;
+  let timer = null;
 
   $("refDate").value = new Date().toISOString().slice(0, 10);
-  let expected = null; // set only when a sample is being tested
+
+  function formatSize(bytes) {
+    return bytes > 1048576 ? (bytes / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(bytes / 1024)) + " KB";
+  }
+
+  // Page 1 rendered with PDF.js: the same page the model reads, and it works where
+  // browsers have no inline PDF viewer (mobile, headless). Falls back to the native viewer.
+  async function renderPdf(file) {
+    if (!window.pdfjsLib) throw new Error("PDF.js unavailable");
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
+    const page = await pdf.getPage(1);
+    const base = page.getViewport({ scale: 1 });
+    const scale = Math.min(2.5, (1400 / base.width));
+    const viewport = page.getViewport({ scale });
+    const canvas = document.createElement("canvas");
+    canvas.width = viewport.width; canvas.height = viewport.height;
+    canvas.setAttribute("role", "img"); canvas.setAttribute("aria-label", "Page 1 of " + file.name);
+    await page.render({ canvasContext: canvas.getContext("2d"), viewport }).promise;
+    return { canvas, pages: pdf.numPages };
+  }
+
+  async function showPreview(file) {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    previewUrl = URL.createObjectURL(file);
+    $("previewName").textContent = file.name;
+    $("previewSize").textContent = formatSize(file.size);
+    const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+    if (!isPdf) {
+      const img = document.createElement("img"); img.src = previewUrl; img.alt = "Document preview";
+      $("frame").replaceChildren(img);
+      return;
+    }
+    $("frame").replaceChildren(Object.assign(document.createElement("div"), { className: "empty", textContent: "Rendering preview…" }));
+    try {
+      const { canvas, pages } = await renderPdf(file);
+      $("frame").replaceChildren(canvas);
+      if (pages > 1) $("previewSize").textContent += ` · page 1 of ${pages} (the page the model reads)`;
+    } catch {
+      const frame = document.createElement("iframe");
+      frame.src = previewUrl + "#view=FitH&toolbar=0"; frame.title = "Document preview";
+      $("frame").replaceChildren(frame);
+    }
+  }
+
+  function setPanel(state) {
+    for (const id of ["idle", "loading", "error", "output"]) $(id).hidden = id !== state;
+  }
+
+  function pick(file, fromSample = false) {
+    if (!file) return;
+    if (!fromSample) { expected = null; markSample(null); }
+    const dt = new DataTransfer(); dt.items.add(file); $("file").files = dt.files;
+    $("fileName").textContent = file.name;
+    $("submit").disabled = false;
+    showPreview(file);
+    $("workspace").hidden = false;
+    setPanel("idle");
+  }
+
+  $("file").addEventListener("change", (e) => pick(e.target.files[0]));
+  ["dragover", "dragenter"].forEach((t) => $("drop").addEventListener(t, (e) => { e.preventDefault(); $("drop").classList.add("drag"); }));
+  ["dragleave", "drop"].forEach((t) => $("drop").addEventListener(t, () => $("drop").classList.remove("drag")));
+  $("drop").addEventListener("drop", (e) => { e.preventDefault(); pick(e.dataTransfer.files[0]); });
+
+  function markSample(name) {
+    document.querySelectorAll(".chip").forEach((c) => c.classList.toggle("active", c.dataset.name === name));
+  }
 
   async function loadSamples() {
     try {
-      const res = await fetch("/api/samples");
-      const data = await res.json();
+      const data = await (await fetch("/api/samples")).json();
       $("samples").replaceChildren(...data.documents.map((doc) => {
         const b = document.createElement("button");
-        b.type = "button"; b.className = "chip"; b.textContent = doc.name;
+        b.type = "button"; b.className = "chip"; b.textContent = doc.name; b.dataset.name = doc.name;
         b.addEventListener("click", () => runSample(doc, data.reference_date));
         return b;
       }));
@@ -124,93 +257,99 @@
   }
 
   async function runSample(doc, referenceDate) {
-    document.querySelectorAll(".chip").forEach((c) => (c.disabled = true));
+    const chips = document.querySelectorAll(".chip");
+    chips.forEach((c) => (c.disabled = true));
     try {
       const blob = await (await fetch("/samples/" + encodeURIComponent(doc.name))).blob();
-      pick(new File([blob], doc.name, { type: "application/pdf" }));
-      $("refDate").value = referenceDate;
       expected = doc.expected;
+      markSample(doc.name);
+      pick(new File([blob], doc.name, { type: "application/pdf" }), true);
+      $("refDate").value = referenceDate;
       await submit();
     } finally {
-      document.querySelectorAll(".chip").forEach((c) => (c.disabled = false));
+      chips.forEach((c) => (c.disabled = false));
     }
   }
-  loadSamples();
 
-  function pick(file) {
-    if (!file) return;
-    expected = null;
-    const dt = new DataTransfer(); dt.items.add(file); $("file").files = dt.files;
-    $("fileName").textContent = file.name;
-    $("submit").disabled = false;
-  }
-  $("file").addEventListener("change", (e) => pick(e.target.files[0]));
-  ["dragover", "dragenter"].forEach((t) => $("drop").addEventListener(t, (e) => { e.preventDefault(); $("drop").classList.add("drag"); }));
-  ["dragleave", "drop"].forEach((t) => $("drop").addEventListener(t, () => $("drop").classList.remove("drag")));
-  $("drop").addEventListener("drop", (e) => { e.preventDefault(); pick(e.dataTransfer.files[0]); });
-
-  function cell(value) {
+  function valueCell(value) {
     const td = document.createElement("td");
-    if (value === null || value === undefined) { td.textContent = "null"; td.className = "null"; }
+    td.className = "val";
+    if (value === null || value === undefined) { td.textContent = "null"; td.classList.add("null"); }
     else td.textContent = String(value);
     return td;
   }
 
   function render(body) {
     const r = body.result;
-    $("summary").textContent = r.is_credential ? "Credential found" : "Not a credential";
+    $("verdict").textContent = r.is_credential ? (r.credential_type || "Credential") : "Not a credential";
     const s = r.expiration_status;
-    $("status").textContent = s ? STATUS[s] : "No status";
-    $("status").className = "status s-" + (s || "none");
+    $("status").textContent = s ? STATUS[s] : (r.is_credential ? "Status unknown" : "No status");
+    $("status").className = "badge b-" + (s || "none");
+    $("notCredential").hidden = r.is_credential;
+
     let hits = 0;
     $("fields").replaceChildren(...FIELDS.map((f) => {
       const tr = document.createElement("tr");
-      const name = document.createElement("td"); name.textContent = f;
-      tr.append(name, cell(r[f]));
+      const key = document.createElement("td"); key.className = "key"; key.textContent = f;
+      const val = valueCell(r[f]);
+      tr.append(key, val);
       if (expected) {
         const ok = JSON.stringify(r[f] ?? null) === JSON.stringify(expected[f] ?? null);
         hits += ok;
+        if (!ok) {
+          const exp = document.createElement("span"); exp.className = "expected";
+          exp.textContent = "expected: " + JSON.stringify(expected[f] ?? null);
+          val.append(exp);
+        }
         const mark = document.createElement("td");
         mark.className = "check " + (ok ? "match" : "miss");
         mark.textContent = ok ? "✓" : "✗";
-        mark.title = ok ? "Matches expected" : "Expected: " + JSON.stringify(expected[f]);
         tr.append(mark);
       }
       return tr;
     }));
     $("score").hidden = !expected;
-    if (expected) $("score").textContent = `${hits}/${FIELDS.length} fields match the expected output` + (hits < FIELDS.length ? " (hover ✗ to see the expected value)" : "");
+    if (expected) {
+      $("score").textContent = `${hits}/${FIELDS.length} fields match the expected output`;
+      $("score").className = "score " + (hits === FIELDS.length ? "all" : "some");
+    }
+
     $("warnings").hidden = !r.warnings.length;
     $("warningList").replaceChildren(...r.warnings.map((w) => { const li = document.createElement("li"); li.textContent = w; return li; }));
     $("json").textContent = JSON.stringify(r, null, 2);
     const m = body.meta;
-    $("meta").textContent = `Model ${m.model} · reference date ${m.reference_date} · ${m.latency_s}s` + (m.cost_usd != null ? ` · $${m.cost_usd.toFixed(5)}` : "");
-    $("output").hidden = false;
+    $("meta").textContent = `${m.model} · reference date ${m.reference_date} · ${m.latency_s}s` + (m.cost_usd != null ? ` · $${m.cost_usd.toFixed(5)}` : "");
+    setPanel("output");
   }
 
-  $("form").addEventListener("submit", (e) => { e.preventDefault(); submit(); });
-
   async function submit() {
-    $("error").hidden = true;
-    $("submit").disabled = true; $("submit").textContent = "Extracting…";
+    const started = Date.now();
+    setPanel("loading");
+    $("loadingText").textContent = "Reading the document…";
+    timer = setInterval(() => ($("loadingText").textContent = `Reading the document… ${Math.round((Date.now() - started) / 1000)}s`), 1000);
+    $("submit").disabled = true;
     try {
       const res = await fetch("/api/extract", { method: "POST", body: new FormData($("form")) });
       const body = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(body.detail || `Request failed (${res.status})`);
       render(body);
     } catch (err) {
-      $("output").hidden = true;
-      $("error").textContent = err.message; $("error").hidden = false;
+      $("error").textContent = err.message;
+      setPanel("error");
     } finally {
-      $("submit").disabled = false; $("submit").textContent = "Extract";
+      clearInterval(timer);
+      $("submit").disabled = false;
     }
   }
+  $("form").addEventListener("submit", (e) => { e.preventDefault(); submit(); });
 
   $("copy").addEventListener("click", async () => {
     try { await navigator.clipboard.writeText($("json").textContent); $("copy").textContent = "Copied"; }
     catch { $("copy").textContent = "Copy failed"; }
     setTimeout(() => ($("copy").textContent = "Copy"), 1500);
   });
+
+  loadSamples();
 </script>
 </body>
 </html>
