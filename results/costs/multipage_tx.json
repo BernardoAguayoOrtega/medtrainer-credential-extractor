@@ -1,0 +1,56 @@
+{
+  "model": "deepseek/deepseek-v4.1-flash",
+  "reference_date": "2026-11-01",
+  "documents": {
+    "tx_01": {
+      "generation_id": "gen-1793162142-GCzdJb2ChCreL7sbFc3k",
+      "prompt_tokens": 2742,
+      "completion_tokens": 86,
+      "cost": 0.00064806,
+      "raw": {
+        "document_kind": "Medical license",
+        "is_credential": true,
+        "holder_name": "ADRIANA LUC\u00cdA FERRER",
+        "credential_type": "Physician License",
+        "license_number": "R4786",
+        "issuing_authority": "Texas Board of Medical Licensure",
+        "issue_date": null,
+        "expiration_date": "08/31/2027"
+      }
+    },
+    "tx_02": {
+      "generation_id": "gen-1793162146-eQ1hZFRZLEAP03OtxSEN",
+      "prompt_tokens": 2742,
+      "completion_tokens": 87,
+      "cost": 0.0005159532,
+      "raw": {
+        "document_kind": "Physician assistant license",
+        "is_credential": true,
+        "holder_name": "DEVIN KOFI ASANTE",
+        "credential_type": "Physician Assistant License",
+        "license_number": "PA20733",
+        "issuing_authority": "Texas Physician Assistant Licensing Board",
+        "issue_date": null,
+        "expiration_date": "02/28/2026"
+      }
+    },
+    "tx_03": {
+      "generation_id": "gen-1793162149-igOo7nIcjh3rlqxbsUam",
+      "prompt_tokens": 2742,
+      "completion_tokens": 86,
+      "cost": 0.0005151132,
+      "raw": {
+        "document_kind": "Physician license",
+        "is_credential": true,
+        "holder_name": "ROBERT ALAN MITCHELL JR.",
+        "credential_type": "Physician License",
+        "license_number": "Q8150",
+        "issuing_authority": "Texas Board of Medical Licensure",
+        "issue_date": null,
+        "expiration_date": "11/30/2026"
+      }
+    }
+  },
+  "total_cost": 0.00167913,
+  "errors": 0
+}
