@@ -5,10 +5,10 @@ Extracts structured data from medical licenses and certifications, flags expirin
 | | |
 |---|---|
 | **Live demo** | https://medtrainer-credential-extractor-seven.vercel.app (one-click tests with the 8 samples) |
-| **Accuracy** | 56.2% → **98.4%** strict field accuracy (7/8 documents perfect); 96.9% on a repeat run |
+| **Accuracy** | 56.2% → **96.9–98.4%** strict field accuracy across runs; the deployed configuration scores **96.9%** (6/8 documents perfect, both misses in `issuing_authority`) |
 | **Cost** | ~$0.0002 per single-page document, ~$0.0005 for a 2-page PDF |
 | **Model** | `deepseek/deepseek-v4.1-flash` on OpenRouter, reasoning off |
-| **Total spend** | ~$0.026 of the $5 key, including every eval run and demo tests |
+| **Total spend** | ~$0.03 of the $5 key, including every eval run and demo tests |
 
 > **Ground truth.** The eval uses only the expected outputs in [`expected/`](expected/). The example JSON in the challenge PDF is outdated (it uses `is_license`, `license_type` and a `state` field); Marco confirmed the repository files are the source of truth.
 
@@ -42,7 +42,7 @@ So the work is split by what each part is good at:
 |---|---|---|
 | Read the document, copy values as printed | **LLM** | The only step that needs vision and language |
 | Parse dates into ISO 8601 | **Code** ([`dates.py`](extractor/dates.py)) | Deterministic, testable, handles `12/15/26`, `March 4th, 2027`, `04-MAR-2027`; an unreadable date becomes `null`, never a guess |
-| `expiration_status` | **Code** ([`status.py`](extractor/status.py)) | Pure date arithmetic against a configurable reference date; reproducible across runs and days |
+| `expiration_status` | **Code** ([`status.py`](extractor/status.py)) | Pure date arithmetic against a configurable reference date; reproducible across runs and days | 100% |
 | Nulls when not a credential, whitespace, title case, leading "The" | **Code** ([`normalize.py`](extractor/normalize.py)) | Output contract enforced in one place, independent of model mood |
 | Review warnings | **Code** ([`validate.py`](extractor/validate.py)) | Cross-checks that never change values, so a human reviews instead of trusting a wrong field |
 
@@ -90,18 +90,19 @@ Every run is saved in [`results/`](results/) (per-field scores and every mismatc
 | 4 | Schema asks for the printed label before each value (`{label, value}`) | 93.8% | 4/8 | ~$0.00027 |
 | 4b | Repeat run of iteration 4 | 93.8% | 4/8 | ~$0.00017 |
 | 5 | Up to 3 pages per PDF (measured on the 3 two-page documents) | 24/24 fields | 3/3 | ~$0.0005 |
+| **Final** | **Deployed configuration (2 + 3 + 5), all 8 documents** | **96.9%** | **6/8** | **~$0.00033 avg** |
 
 Per-field accuracy:
 
-| Field | Baseline | Iter 1 | Iter 2/3 |
-|---|---|---|---|
-| `is_credential` | 100% | 100% | 100% |
-| `holder_name` | 38% | 75% | 100% |
-| `credential_type` | 50% | 62% | 100% |
-| `license_number` | 62% | 100% | 100% |
-| `issuing_authority` | 38% | 75% | 88% |
-| `issue_date` | 88% | 100% | 100% |
-| `expiration_date` | 12% | 100% | 100% |
+| Field | Baseline | Iter 1 | Iter 2/3 | Final |
+|---|---|---|---|---|
+| `is_credential` | 100% | 100% | 100% | 100% |
+| `holder_name` | 38% | 75% | 100% | 100% |
+| `credential_type` | 50% | 62% | 100% | 100% |
+| `license_number` | 62% | 100% | 100% | 100% |
+| `issuing_authority` | 38% | 75% | 88% | 75% |
+| `issue_date` | 88% | 100% | 100% | 100% |
+| `expiration_date` | 12% | 100% | 100% | 100% |
 | `expiration_status` | 62% | 100% | 100% |
 
 **What failed at first and what changed it**
@@ -111,7 +112,7 @@ Per-field accuracy:
 - **Iteration 4 was discarded.** Asking for the printed label first made labels perfectly correct but consistently hurt neighboring fields (sub-office lines leaked into the authority, "License" dropped from the type). Same 93.8% on two runs, so it is a real regression, not noise. The label-based warnings stay in the code and switch on with `--labelled`.
 - **Noise is real:** the same configuration scored 98.4% and 96.9% (±1 field). With 8 documents one field is 1.6 points, so differences under ~3 points are not conclusive.
 
-**The remaining miss** is `ny_01.issuing_authority`: the document prints *"The State of New York Department of Professional Registration"* and the expected value is *"New York State Department of Professional Registration"*. That rewording is a labeling convention, not something printed. A rule to force it would only fit this sample, so it is left as a known miss rather than overfitted.
+**The remaining misses** are in `issuing_authority` for the two New York documents. In the final run the model kept the sub-office line ("… Office of Licensed Professions") despite the prompt; across runs this field scored 75–88%. For `ny_01` the document prints *"The State of New York Department of Professional Registration"* and the expected value is *"New York State Department of Professional Registration"*. That rewording is a labeling convention, not something printed. A rule to force it would only fit this sample, so it is left as a known miss rather than overfitted.
 
 ## Model choice
 

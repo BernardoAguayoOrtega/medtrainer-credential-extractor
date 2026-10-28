@@ -1,0 +1,144 @@
+{
+  "model": "deepseek/deepseek-v4.1-flash",
+  "reference_date": "2026-11-01",
+  "documents": {
+    "al_01": {
+      "generation_id": "gen-1793162639-wZ7k1QtvhYj89bTCiihQ",
+      "prompt_tokens": 1750,
+      "completion_tokens": 90,
+      "cost": 0.000236848,
+      "raw": {
+        "document_kind": "Certificate of Registration",
+        "is_credential": true,
+        "holder_name": "Tamsin Rae Holloway",
+        "credential_type": "Certificate of Registration",
+        "license_number": "MD.41872",
+        "issuing_authority": "Alabama Medical Registration Commission",
+        "issue_date": "03/14/2012",
+        "expiration_date": "12/31/2027"
+      },
+      "pages": 1
+    },
+    "al_02": {
+      "generation_id": "gen-1793162640-IcYBQndchBIXtqj5N8v2",
+      "prompt_tokens": 1784,
+      "completion_tokens": 86,
+      "cost": 0.000189516,
+      "raw": {
+        "document_kind": "Medical License",
+        "is_credential": true,
+        "holder_name": "Rafael Ignacio de la Cruz",
+        "credential_type": "License to Practice Medicine",
+        "license_number": "MD.20417",
+        "issuing_authority": "Alabama Medical Registration Commission",
+        "issue_date": "2009-07-15",
+        "expiration_date": null
+      },
+      "pages": 1
+    },
+    "al_03": {
+      "generation_id": "gen-1793162642-k81nWn01P2msVuCmYQEG",
+      "prompt_tokens": 1778,
+      "completion_tokens": 61,
+      "cost": 0.000172486,
+      "raw": {
+        "document_kind": "Annual registration renewal notice",
+        "is_credential": false,
+        "holder_name": null,
+        "credential_type": null,
+        "license_number": null,
+        "issuing_authority": null,
+        "issue_date": null,
+        "expiration_date": null
+      },
+      "pages": 1
+    },
+    "ny_01": {
+      "generation_id": "gen-1793162644-zlLLDoK0oJvJyHhxMESW",
+      "prompt_tokens": 1813,
+      "completion_tokens": 97,
+      "cost": 0.000200436,
+      "raw": {
+        "document_kind": "Registration certificate with cover letter",
+        "is_credential": true,
+        "holder_name": "HALVORSEN INGRID S",
+        "credential_type": "Physician",
+        "license_number": "301455-01",
+        "issuing_authority": "The State of New York Department of Professional Registration Office of Licensed Professions",
+        "issue_date": null,
+        "expiration_date": "03/31/2028"
+      },
+      "pages": 1
+    },
+    "ny_02": {
+      "generation_id": "gen-1793162647-FmsXZQHZooN7DyVJqe0v",
+      "prompt_tokens": 1778,
+      "completion_tokens": 99,
+      "cost": 0.000197186,
+      "raw": {
+        "document_kind": "Registration certificate with cover instructions",
+        "is_credential": true,
+        "holder_name": "MBEKI-LINDQVIST NOMVULA GRACE",
+        "credential_type": "Physician Assistant",
+        "license_number": "019873-01",
+        "issuing_authority": "New York State Department of Professional Registration Office of Licensed Professions",
+        "issue_date": null,
+        "expiration_date": "12/15/26"
+      },
+      "pages": 1
+    },
+    "tx_01": {
+      "generation_id": "gen-1793162650-km1ZCR5t4mlpdBGvbhUR",
+      "prompt_tokens": 2742,
+      "completion_tokens": 86,
+      "cost": 0.00064806,
+      "raw": {
+        "document_kind": "Medical license",
+        "is_credential": true,
+        "holder_name": "ADRIANA LUC\u00cdA FERRER",
+        "credential_type": "Physician License",
+        "license_number": "R4786",
+        "issuing_authority": "Texas Board of Medical Licensure",
+        "issue_date": null,
+        "expiration_date": "08/31/2027"
+      },
+      "pages": 2
+    },
+    "tx_02": {
+      "generation_id": "gen-1793162653-cgvFvZptCxS0jbNDD6aK",
+      "prompt_tokens": 2742,
+      "completion_tokens": 87,
+      "cost": 0.0005159532,
+      "raw": {
+        "document_kind": "Physician assistant license",
+        "is_credential": true,
+        "holder_name": "DEVIN KOFI ASANTE",
+        "credential_type": "Physician Assistant License",
+        "license_number": "PA20733",
+        "issuing_authority": "Texas Physician Assistant Licensing Board",
+        "issue_date": null,
+        "expiration_date": "02/28/2026"
+      },
+      "pages": 2
+    },
+    "tx_03": {
+      "generation_id": "gen-1793162656-74P3Ss1S1nlCEXWhgvS6",
+      "prompt_tokens": 2742,
+      "completion_tokens": 85,
+      "cost": 0.0005142732,
+      "raw": {
+        "document_kind": "Medical license",
+        "is_credential": true,
+        "holder_name": "ROBERT ALAN MITCHELL JR.",
+        "credential_type": "Physician License",
+        "license_number": "Q8150",
+        "issuing_authority": "Texas Board of Medical Licensure",
+        "issue_date": null,
+        "expiration_date": "11/30/2026"
+      },
+      "pages": 2
+    }
+  },
+  "total_cost": 0.00267476,
+  "errors": 0
+}
