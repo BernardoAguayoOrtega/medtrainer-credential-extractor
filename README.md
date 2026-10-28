@@ -114,6 +114,8 @@ Per-field accuracy:
 
 **The remaining misses** are in `issuing_authority` for the two New York documents. In the final run the model kept the sub-office line ("… Office of Licensed Professions") despite the prompt; across runs this field scored 75–88%. For `ny_01` the document prints *"The State of New York Department of Professional Registration"* and the expected value is *"New York State Department of Professional Registration"*. That rewording is a labeling convention, not something printed. A rule to force it would only fit this sample, so it is left as a known miss rather than overfitted.
 
+**Considered and rejected:** a deterministic rule that cuts a trailing *"Office of …"* from `issuing_authority`. It would fix `ny_02` (+1.6 points) and fits the "code decides" design, but it is derived from a single document family. On unseen documents it could just as easily truncate an authority whose real name contains "Office of" (e.g. *"Office of the Professions"*). The sample score is not worth a rule that cannot be justified beyond these 8 files. The prompt already asks to drop sub-office lines; the right fix is more labeled examples, not a special case.
+
 ## Model choice
 
 `deepseek/deepseek-v4.1-flash` ($0.14 / M input, $0.42 / M output tokens), the baseline's model, kept on purpose:
