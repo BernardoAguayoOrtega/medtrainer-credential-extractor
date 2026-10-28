@@ -4,8 +4,6 @@ __pycache__/
 outputs/
 results/
 tests/
-docs/
-expected/
 *.md
 requirements-dev.txt
 .env.local

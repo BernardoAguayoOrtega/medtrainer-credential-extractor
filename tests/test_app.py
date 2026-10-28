@@ -94,6 +94,28 @@ def test_rate_limit_blocks_after_the_quota(client, monkeypatch):
     assert [upload(client).status_code for _ in range(3)] == [200, 200, 429]
 
 
+def test_samples_are_listed_with_their_expected_output(client):
+    samples = client.get("/api/samples").json()
+
+    names = [s["name"] for s in samples["documents"]]
+    assert "tx_02.pdf" in names and len(names) == 8
+    assert samples["reference_date"] == "2026-11-01"
+    tx_02 = next(s for s in samples["documents"] if s["name"] == "tx_02.pdf")
+    assert tx_02["expected"]["license_number"] == "PA20733"
+
+
+def test_a_sample_document_can_be_downloaded(client):
+    response = client.get("/samples/tx_02.pdf")
+
+    assert response.status_code == 200
+    assert response.content.startswith(b"%PDF")
+
+
+@pytest.mark.parametrize("name", ["../app.py", "..%2Fapp.py", "nope.pdf", ".env"])
+def test_only_listed_samples_are_served(client, name):
+    assert client.get(f"/samples/{name}").status_code == 404
+
+
 def test_model_failure_returns_502_with_a_safe_message(client, monkeypatch):
     def broken(mime, image_b64, model):
         raise RuntimeError("OpenRouter 500: secret details")

@@ -3,6 +3,7 @@
 Run locally:  uvicorn app:app --reload
 """
 
+import json
 import logging
 import os
 import time
@@ -11,7 +12,7 @@ from datetime import date
 from pathlib import Path
 
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
-from fastapi.responses import HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse
 
 from extractor.llm import DEFAULT_MODEL, call_openrouter
 from extractor.pipeline import extract_bytes
@@ -28,7 +29,10 @@ SIGNATURES = {
     ".jpeg": [b"\xff\xd8\xff"],
     ".webp": [b"RIFF"],
 }
-INDEX_HTML = (Path(__file__).parent / "templates" / "index.html").read_text()
+ROOT = Path(__file__).parent
+INDEX_HTML = (ROOT / "templates" / "index.html").read_text()
+# The challenge's sample documents, bundled for a one-click test. Served from a fixed allowlist.
+SAMPLES = {p.name: p for p in sorted((ROOT / "docs").glob("*.pdf"))}
 
 call_model = call_openrouter
 
@@ -65,6 +69,25 @@ def home() -> str:
 @app.get("/api/health")
 def health() -> dict:
     return {"status": "ok", "model": MODEL}
+
+
+@app.get("/api/samples")
+def samples() -> dict:
+    reference = json.loads((ROOT / "expected" / "_reference.json").read_text())
+    return {
+        "reference_date": reference["reference_date"],
+        "documents": [
+            {"name": name, "expected": json.loads((ROOT / "expected" / f"{path.stem}.json").read_text())}
+            for name, path in SAMPLES.items()
+        ],
+    }
+
+
+@app.get("/samples/{name}")
+def sample(name: str) -> FileResponse:
+    if name not in SAMPLES:
+        raise HTTPException(404, "Unknown sample")
+    return FileResponse(SAMPLES[name], media_type="application/pdf")
 
 
 @app.post("/api/extract")

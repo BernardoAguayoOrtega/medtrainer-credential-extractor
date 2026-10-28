@@ -8,11 +8,13 @@
   :root {
     --bg: #f6f7f9; --card: #ffffff; --text: #18202b; --muted: #5b6575; --border: #dde2ea;
     --accent: #1f5fbf; --ok: #1d7a46; --warn: #a15c00; --bad: #b42318; --code: #f0f2f5;
+    color-scheme: light;
   }
   @media (prefers-color-scheme: dark) {
     :root {
       --bg: #11151b; --card: #1a2029; --text: #e6e9ee; --muted: #9aa4b2; --border: #2c3542;
       --accent: #6aa1ff; --ok: #4cc283; --warn: #f0a640; --bad: #ff6b5e; --code: #141920;
+      color-scheme: dark;
     }
   }
   * { box-sizing: border-box; }
@@ -21,7 +23,7 @@
   h1 { font-size: 1.5rem; margin: 0 0 4px; }
   p.lead { color: var(--muted); margin: 0 0 24px; }
   .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
-  .drop { border: 2px dashed var(--border); border-radius: 10px; padding: 28px 16px; text-align: center; cursor: pointer; transition: border-color .15s; }
+  .drop { display: block; border: 2px dashed var(--border); border-radius: 10px; padding: 28px 16px; text-align: center; cursor: pointer; transition: border-color .15s; }
   .drop:hover, .drop.drag { border-color: var(--accent); }
   .drop strong { color: var(--accent); }
   .drop .file { margin-top: 8px; color: var(--muted); font-size: .9rem; word-break: break-all; }
@@ -46,6 +48,13 @@
   pre { background: var(--code); border-radius: 8px; padding: 14px; overflow-x: auto; font-size: .82rem; margin: 10px 0 0; }
   .meta { color: var(--muted); font-size: .82rem; margin-top: 10px; }
   .head { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .samples { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .chip { font: inherit; font-size: .85rem; padding: 5px 12px; border-radius: 999px; border: 1px solid var(--border); background: var(--code); color: var(--text); cursor: pointer; }
+  .chip:hover { border-color: var(--accent); }
+  .chip:disabled { opacity: .5; cursor: default; }
+  td.check { width: 28px; text-align: center; font-weight: 700; }
+  td.match { color: var(--ok); } td.miss { color: var(--bad); }
+  .score { font-size: .9rem; color: var(--muted); margin-top: 8px; }
   [hidden] { display: none !important; }
 </style>
 </head>
@@ -69,11 +78,18 @@
     <p class="hint">Demo only: please do not upload real personal or health data. Documents are processed in memory and not stored. The eval uses reference date 2026-11-01.</p>
   </form>
 
+  <section class="card">
+    <strong>Quick test with the challenge samples</strong>
+    <div class="hint" style="margin-top:4px">Runs the extractor on a sample with the eval reference date (2026-11-01) and checks each field against its expected output.</div>
+    <div class="samples" id="samples"></div>
+  </section>
+
   <section class="card" id="output" hidden>
     <div class="head">
       <strong id="summary"></strong>
       <span class="status" id="status"></span>
     </div>
+    <div class="score" id="score" hidden></div>
     <table id="fields"></table>
     <div class="warnings" id="warnings" hidden><strong>Needs review</strong><ul id="warningList"></ul></div>
     <div class="head" style="margin-top:16px">
@@ -92,9 +108,38 @@
   const STATUS = { valid: "Valid", expiring_soon: "Expiring soon", expired: "Expired", no_expiration: "No expiration" };
 
   $("refDate").value = new Date().toISOString().slice(0, 10);
+  let expected = null; // set only when a sample is being tested
+
+  async function loadSamples() {
+    try {
+      const res = await fetch("/api/samples");
+      const data = await res.json();
+      $("samples").replaceChildren(...data.documents.map((doc) => {
+        const b = document.createElement("button");
+        b.type = "button"; b.className = "chip"; b.textContent = doc.name;
+        b.addEventListener("click", () => runSample(doc, data.reference_date));
+        return b;
+      }));
+    } catch { $("samples").textContent = "Samples unavailable."; }
+  }
+
+  async function runSample(doc, referenceDate) {
+    document.querySelectorAll(".chip").forEach((c) => (c.disabled = true));
+    try {
+      const blob = await (await fetch("/samples/" + encodeURIComponent(doc.name))).blob();
+      pick(new File([blob], doc.name, { type: "application/pdf" }));
+      $("refDate").value = referenceDate;
+      expected = doc.expected;
+      await submit();
+    } finally {
+      document.querySelectorAll(".chip").forEach((c) => (c.disabled = false));
+    }
+  }
+  loadSamples();
 
   function pick(file) {
     if (!file) return;
+    expected = null;
     const dt = new DataTransfer(); dt.items.add(file); $("file").files = dt.files;
     $("fileName").textContent = file.name;
     $("submit").disabled = false;
@@ -117,11 +162,24 @@
     const s = r.expiration_status;
     $("status").textContent = s ? STATUS[s] : "No status";
     $("status").className = "status s-" + (s || "none");
+    let hits = 0;
     $("fields").replaceChildren(...FIELDS.map((f) => {
       const tr = document.createElement("tr");
       const name = document.createElement("td"); name.textContent = f;
-      tr.append(name, cell(r[f])); return tr;
+      tr.append(name, cell(r[f]));
+      if (expected) {
+        const ok = JSON.stringify(r[f] ?? null) === JSON.stringify(expected[f] ?? null);
+        hits += ok;
+        const mark = document.createElement("td");
+        mark.className = "check " + (ok ? "match" : "miss");
+        mark.textContent = ok ? "✓" : "✗";
+        mark.title = ok ? "Matches expected" : "Expected: " + JSON.stringify(expected[f]);
+        tr.append(mark);
+      }
+      return tr;
     }));
+    $("score").hidden = !expected;
+    if (expected) $("score").textContent = `${hits}/${FIELDS.length} fields match the expected output` + (hits < FIELDS.length ? " (hover ✗ to see the expected value)" : "");
     $("warnings").hidden = !r.warnings.length;
     $("warningList").replaceChildren(...r.warnings.map((w) => { const li = document.createElement("li"); li.textContent = w; return li; }));
     $("json").textContent = JSON.stringify(r, null, 2);
@@ -130,8 +188,9 @@
     $("output").hidden = false;
   }
 
-  $("form").addEventListener("submit", async (e) => {
-    e.preventDefault();
+  $("form").addEventListener("submit", (e) => { e.preventDefault(); submit(); });
+
+  async function submit() {
     $("error").hidden = true;
     $("submit").disabled = true; $("submit").textContent = "Extracting…";
     try {
@@ -145,7 +204,7 @@
     } finally {
       $("submit").disabled = false; $("submit").textContent = "Extract";
     }
-  });
+  }
 
   $("copy").addEventListener("click", async () => {
     try { await navigator.clipboard.writeText($("json").textContent); $("copy").textContent = "Copied"; }
