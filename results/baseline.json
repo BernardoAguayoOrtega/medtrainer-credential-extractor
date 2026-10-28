@@ -1,0 +1,213 @@
+{
+  "documents": 8,
+  "exact_documents": 0,
+  "fields": {
+    "is_credential": {
+      "strict": 1.0,
+      "lenient": 1.0
+    },
+    "holder_name": {
+      "strict": 0.375,
+      "lenient": 0.375
+    },
+    "credential_type": {
+      "strict": 0.5,
+      "lenient": 0.75
+    },
+    "license_number": {
+      "strict": 0.625,
+      "lenient": 0.625
+    },
+    "issuing_authority": {
+      "strict": 0.375,
+      "lenient": 0.625
+    },
+    "issue_date": {
+      "strict": 0.875,
+      "lenient": 0.875
+    },
+    "expiration_date": {
+      "strict": 0.125,
+      "lenient": 0.125
+    },
+    "expiration_status": {
+      "strict": 0.625,
+      "lenient": 0.625
+    }
+  },
+  "overall": {
+    "strict": 0.5625,
+    "lenient": 0.625
+  },
+  "mismatches": [
+    {
+      "document": "al_01",
+      "field": "holder_name",
+      "expected": "Tamsin Rae Holloway",
+      "actual": "Tamsin Rae Holloway MD"
+    },
+    {
+      "document": "al_01",
+      "field": "license_number",
+      "expected": "MD.41872",
+      "actual": "MD-41872"
+    },
+    {
+      "document": "al_01",
+      "field": "issue_date",
+      "expected": "2012-03-14",
+      "actual": "03/14/2012"
+    },
+    {
+      "document": "al_01",
+      "field": "expiration_date",
+      "expected": "2027-12-31",
+      "actual": "12/31/2027"
+    },
+    {
+      "document": "al_02",
+      "field": "holder_name",
+      "expected": "Rafael Ignacio de la Cruz",
+      "actual": "Rafael Ignacio de la Cruz, MD"
+    },
+    {
+      "document": "al_02",
+      "field": "credential_type",
+      "expected": "License to Practice Medicine",
+      "actual": "LICENSE TO PRACTICE MEDICINE"
+    },
+    {
+      "document": "al_02",
+      "field": "license_number",
+      "expected": "MD.20417",
+      "actual": "MD-20417"
+    },
+    {
+      "document": "al_02",
+      "field": "issuing_authority",
+      "expected": "Alabama Medical Registration Commission",
+      "actual": "ALABAMA MEDICAL REGISTRATION COMMISSION"
+    },
+    {
+      "document": "al_03",
+      "field": "holder_name",
+      "expected": null,
+      "actual": "Prakash Venkataraman"
+    },
+    {
+      "document": "al_03",
+      "field": "credential_type",
+      "expected": null,
+      "actual": "Medical License"
+    },
+    {
+      "document": "al_03",
+      "field": "license_number",
+      "expected": null,
+      "actual": "MD.33950"
+    },
+    {
+      "document": "al_03",
+      "field": "issuing_authority",
+      "expected": null,
+      "actual": "Alabama Medical Registration Commission"
+    },
+    {
+      "document": "al_03",
+      "field": "expiration_date",
+      "expected": null,
+      "actual": "12/31/2026"
+    },
+    {
+      "document": "al_03",
+      "field": "expiration_status",
+      "expected": null,
+      "actual": "expiring_soon"
+    },
+    {
+      "document": "ny_01",
+      "field": "credential_type",
+      "expected": "Physician",
+      "actual": "PHYSICIAN"
+    },
+    {
+      "document": "ny_01",
+      "field": "issuing_authority",
+      "expected": "New York State Department of Professional Registration",
+      "actual": "The State of New York Department of Professional Registration Office of Licensed Professions"
+    },
+    {
+      "document": "ny_01",
+      "field": "expiration_date",
+      "expected": "2028-03-31",
+      "actual": "03/31/2028"
+    },
+    {
+      "document": "ny_02",
+      "field": "issuing_authority",
+      "expected": "New York State Department of Professional Registration",
+      "actual": "The State of New York Department of Professional Registration, Office of Licensed Professions"
+    },
+    {
+      "document": "ny_02",
+      "field": "expiration_date",
+      "expected": "2026-12-15",
+      "actual": "12/15/26"
+    },
+    {
+      "document": "ny_02",
+      "field": "expiration_status",
+      "expected": "expiring_soon",
+      "actual": "valid"
+    },
+    {
+      "document": "tx_01",
+      "field": "holder_name",
+      "expected": "ADRIANA LUCÍA FERRER",
+      "actual": "ADRIANA LUCÍA FERRER, MD"
+    },
+    {
+      "document": "tx_01",
+      "field": "expiration_date",
+      "expected": "2027-08-31",
+      "actual": "08/31/2027"
+    },
+    {
+      "document": "tx_02",
+      "field": "credential_type",
+      "expected": "Physician Assistant License",
+      "actual": "PHYSICIAN ASSISTANT"
+    },
+    {
+      "document": "tx_02",
+      "field": "issuing_authority",
+      "expected": "Texas Physician Assistant Licensing Board",
+      "actual": "TEXAS PHYSICIAN ASSISTANT LICENSING BOARD"
+    },
+    {
+      "document": "tx_02",
+      "field": "expiration_date",
+      "expected": "2026-02-28",
+      "actual": "02/28/2026"
+    },
+    {
+      "document": "tx_03",
+      "field": "holder_name",
+      "expected": "ROBERT ALAN MITCHELL JR.",
+      "actual": "ROBERT ALAN MITCHELL JR., DO"
+    },
+    {
+      "document": "tx_03",
+      "field": "expiration_date",
+      "expected": "2026-11-30",
+      "actual": "11/30/2026"
+    },
+    {
+      "document": "tx_03",
+      "field": "expiration_status",
+      "expected": "expiring_soon",
+      "actual": "valid"
+    }
+  ],
+  "errors": []
+}

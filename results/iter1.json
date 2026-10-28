@@ -1,0 +1,87 @@
+{
+  "documents": 8,
+  "exact_documents": 2,
+  "fields": {
+    "is_credential": {
+      "strict": 1.0,
+      "lenient": 1.0
+    },
+    "holder_name": {
+      "strict": 0.75,
+      "lenient": 1.0
+    },
+    "credential_type": {
+      "strict": 0.625,
+      "lenient": 0.75
+    },
+    "license_number": {
+      "strict": 1.0,
+      "lenient": 1.0
+    },
+    "issuing_authority": {
+      "strict": 0.75,
+      "lenient": 0.75
+    },
+    "issue_date": {
+      "strict": 1.0,
+      "lenient": 1.0
+    },
+    "expiration_date": {
+      "strict": 1.0,
+      "lenient": 1.0
+    },
+    "expiration_status": {
+      "strict": 1.0,
+      "lenient": 1.0
+    }
+  },
+  "overall": {
+    "strict": 0.890625,
+    "lenient": 0.9375
+  },
+  "mismatches": [
+    {
+      "document": "al_01",
+      "field": "credential_type",
+      "expected": "Certificate of Registration",
+      "actual": "Certificate Of Registration"
+    },
+    {
+      "document": "al_02",
+      "field": "credential_type",
+      "expected": "License to Practice Medicine",
+      "actual": "Physician License"
+    },
+    {
+      "document": "ny_01",
+      "field": "credential_type",
+      "expected": "Physician",
+      "actual": "Registration Certificate"
+    },
+    {
+      "document": "ny_01",
+      "field": "issuing_authority",
+      "expected": "New York State Department of Professional Registration",
+      "actual": "State of New York Department of Professional Registration"
+    },
+    {
+      "document": "ny_02",
+      "field": "issuing_authority",
+      "expected": "New York State Department of Professional Registration",
+      "actual": "New York Department of Professional Registration"
+    },
+    {
+      "document": "tx_01",
+      "field": "holder_name",
+      "expected": "ADRIANA LUCÍA FERRER",
+      "actual": "Adriana Lucía Ferrer"
+    },
+    {
+      "document": "tx_02",
+      "field": "holder_name",
+      "expected": "DEVIN KOFI ASANTE",
+      "actual": "Devin Kofi Asante"
+    }
+  ],
+  "errors": []
+}

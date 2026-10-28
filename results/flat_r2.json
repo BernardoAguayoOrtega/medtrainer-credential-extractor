@@ -1,0 +1,57 @@
+{
+  "documents": 8,
+  "exact_documents": 6,
+  "fields": {
+    "is_credential": {
+      "strict": 1.0,
+      "lenient": 1.0
+    },
+    "holder_name": {
+      "strict": 0.875,
+      "lenient": 0.875
+    },
+    "credential_type": {
+      "strict": 1.0,
+      "lenient": 1.0
+    },
+    "license_number": {
+      "strict": 1.0,
+      "lenient": 1.0
+    },
+    "issuing_authority": {
+      "strict": 0.875,
+      "lenient": 0.875
+    },
+    "issue_date": {
+      "strict": 1.0,
+      "lenient": 1.0
+    },
+    "expiration_date": {
+      "strict": 1.0,
+      "lenient": 1.0
+    },
+    "expiration_status": {
+      "strict": 1.0,
+      "lenient": 1.0
+    }
+  },
+  "overall": {
+    "strict": 0.96875,
+    "lenient": 0.96875
+  },
+  "mismatches": [
+    {
+      "document": "ny_01",
+      "field": "issuing_authority",
+      "expected": "New York State Department of Professional Registration",
+      "actual": "State of New York Department of Professional Registration Office of Licensed Professions"
+    },
+    {
+      "document": "tx_01",
+      "field": "holder_name",
+      "expected": "ADRIANA LUCÍA FERRER",
+      "actual": "ADRIANA LUCIA FERRER"
+    }
+  ],
+  "errors": []
+}

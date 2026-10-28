@@ -1,0 +1,208 @@
+{
+  "model": "deepseek/deepseek-v4.1-flash",
+  "reference_date": "2026-11-01",
+  "documents": {
+    "al_01": {
+      "generation_id": "gen-1793159743-7jXHxeU9obiEwMjn3Oeo",
+      "prompt_tokens": 1974,
+      "completion_tokens": 122,
+      "cost": 0.000221232,
+      "raw": {
+        "document_kind": "Certificate of Registration",
+        "is_credential": true,
+        "holder_name": "Tamsin Rae Holloway",
+        "credential_type": "Certificate of Registration",
+        "license_number": {
+          "label": "License #",
+          "value": "MD.41872"
+        },
+        "issuing_authority": "Alabama Medical Registration Commission",
+        "issue_date": {
+          "label": "Date Issued",
+          "text": "03/14/2012"
+        },
+        "expiration_date": {
+          "label": "Expires",
+          "text": "12/31/2027"
+        }
+      }
+    },
+    "al_02": {
+      "generation_id": "gen-1793159745-vLpH8TYhF2FEc4Zz4zAQ",
+      "prompt_tokens": 2008,
+      "completion_tokens": 115,
+      "cost": 9.003e-05,
+      "raw": {
+        "document_kind": "Medical license",
+        "is_credential": true,
+        "holder_name": "Rafael Ignacio de la Cruz",
+        "credential_type": "License to Practice Medicine",
+        "license_number": {
+          "label": "License #",
+          "value": "MD.20417"
+        },
+        "issuing_authority": "Alabama Medical Registration Commission",
+        "issue_date": {
+          "label": "Date Issued",
+          "text": "2009-07-15"
+        },
+        "expiration_date": {
+          "label": null,
+          "text": null
+        }
+      }
+    },
+    "al_03": {
+      "generation_id": "gen-1793159746-tToR0bmA73To7ze2zs8P",
+      "prompt_tokens": 2002,
+      "completion_tokens": 85,
+      "cost": 0.000200822,
+      "raw": {
+        "document_kind": "Annual registration renewal notice",
+        "is_credential": false,
+        "holder_name": null,
+        "credential_type": null,
+        "license_number": {
+          "label": null,
+          "value": null
+        },
+        "issuing_authority": null,
+        "issue_date": {
+          "label": null,
+          "text": null
+        },
+        "expiration_date": {
+          "label": null,
+          "text": null
+        }
+      }
+    },
+    "ny_01": {
+      "generation_id": "gen-1793159748-XaPpXh0UyTSClLlY4DOt",
+      "prompt_tokens": 2037,
+      "completion_tokens": 129,
+      "cost": 0.000233972,
+      "raw": {
+        "document_kind": "Registration certificate",
+        "is_credential": true,
+        "holder_name": "HALVORSEN INGRID S",
+        "credential_type": "Physician",
+        "license_number": {
+          "label": "License Number:",
+          "value": "301455-01"
+        },
+        "issuing_authority": "The State of New York Department of Professional Registration Office of Licensed Professions",
+        "issue_date": {
+          "label": null,
+          "text": null
+        },
+        "expiration_date": {
+          "label": "registered to practice in New York State through",
+          "text": "03/31/2028"
+        }
+      }
+    },
+    "ny_02": {
+      "generation_id": "gen-1793159749-EruOBtc4fnZAUgwf0iEJ",
+      "prompt_tokens": 2002,
+      "completion_tokens": 133,
+      "cost": 0.000232022,
+      "raw": {
+        "document_kind": "Registration certificate",
+        "is_credential": true,
+        "holder_name": "MBEKI-LINDQVIST NOMVULA GRACE",
+        "credential_type": "Physician Assistant",
+        "license_number": {
+          "label": "License Number",
+          "value": "019873-01"
+        },
+        "issuing_authority": "The State of New York Department of Professional Registration Office of Licensed Professions",
+        "issue_date": {
+          "label": null,
+          "text": null
+        },
+        "expiration_date": {
+          "label": "registered to practice in New York State through",
+          "text": "12/15/26"
+        }
+      }
+    },
+    "tx_01": {
+      "generation_id": "gen-1793159752-eThVjiebe6NeIRLJSBCB",
+      "prompt_tokens": 2002,
+      "completion_tokens": 118,
+      "cost": 9.12e-05,
+      "raw": {
+        "document_kind": "Medical license",
+        "is_credential": true,
+        "holder_name": "ADRIANA LUCIA FERRER",
+        "credential_type": "Physician License",
+        "license_number": {
+          "label": "LICENSE NUMBER",
+          "value": "R4786"
+        },
+        "issuing_authority": "Texas Board of Medical Licensure",
+        "issue_date": {
+          "label": null,
+          "text": null
+        },
+        "expiration_date": {
+          "label": "EXPIRATION DATE",
+          "text": "08/31/2027"
+        }
+      }
+    },
+    "tx_02": {
+      "generation_id": "gen-1793159754-enyyNohfrd5VD8B7RnFU",
+      "prompt_tokens": 2002,
+      "completion_tokens": 118,
+      "cost": 0.000222272,
+      "raw": {
+        "document_kind": "Physician Assistant License",
+        "is_credential": true,
+        "holder_name": "DEVIN KOFI ASANTE",
+        "credential_type": "Physician Assistant",
+        "license_number": {
+          "label": "LICENSE NUMBER",
+          "value": "PA20733"
+        },
+        "issuing_authority": "Texas Physician Assistant Licensing Board",
+        "issue_date": {
+          "label": null,
+          "text": null
+        },
+        "expiration_date": {
+          "label": "EXPIRATION DATE",
+          "text": "02/28/2026"
+        }
+      }
+    },
+    "tx_03": {
+      "generation_id": "gen-1793159756-wxRJh7hBNG3302lgub7M",
+      "prompt_tokens": 2002,
+      "completion_tokens": 118,
+      "cost": 9.12e-05,
+      "raw": {
+        "document_kind": "Physician license",
+        "is_credential": true,
+        "holder_name": "ROBERT ALAN MITCHELL JR.",
+        "credential_type": "Physician License",
+        "license_number": {
+          "label": "LICENSE NUMBER",
+          "value": "Q8150"
+        },
+        "issuing_authority": "Texas Board of Medical Licensure",
+        "issue_date": {
+          "label": null,
+          "text": null
+        },
+        "expiration_date": {
+          "label": "EXPIRATION DATE",
+          "text": "11/30/2026"
+        }
+      }
+    }
+  },
+  "total_cost": 0.00138275,
+  "errors": 0
+}

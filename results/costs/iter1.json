@@ -1,0 +1,56 @@
+{
+  "model": "deepseek/deepseek-v4.1-flash",
+  "reference_date": "2026-11-01",
+  "documents": {
+    "tx_02": {
+      "generation_id": "gen-1793158613-qOHNwqOwzIy4jS0uEW6d",
+      "prompt_tokens": 1702,
+      "completion_tokens": 624,
+      "cost": 0.00062686
+    },
+    "al_01": {
+      "generation_id": "gen-1793158692-BK09SMPtM0HkckjprZhT",
+      "prompt_tokens": 1674,
+      "completion_tokens": 341,
+      "cost": 0.00035735
+    },
+    "al_02": {
+      "generation_id": "gen-1793158695-kqDdrEfJdNr7y70vQlmE",
+      "prompt_tokens": 1708,
+      "completion_tokens": 432,
+      "cost": 0.00042092
+    },
+    "al_03": {
+      "generation_id": "gen-1793158699-x7LrDIzozT8UivBzUDhh",
+      "prompt_tokens": 1702,
+      "completion_tokens": 94,
+      "cost": 0.00020044
+    },
+    "ny_01": {
+      "generation_id": "gen-1793158702-mpkEHWdkWPOFsN1AVrJ7",
+      "prompt_tokens": 1737,
+      "completion_tokens": 901,
+      "cost": 0.00072954
+    },
+    "ny_02": {
+      "generation_id": "gen-1793158707-BczGFtuXqp9vH8JcbKFp",
+      "prompt_tokens": 1702,
+      "completion_tokens": 416,
+      "cost": 0.00040974
+    },
+    "tx_01": {
+      "generation_id": "gen-1793158711-d4s06F74JFMvFQGipVSQ",
+      "prompt_tokens": 1702,
+      "completion_tokens": 294,
+      "cost": 0.00033044
+    },
+    "tx_03": {
+      "generation_id": "gen-1793158714-yrbTSjloSN2MV0j8Lnes",
+      "prompt_tokens": 1702,
+      "completion_tokens": 328,
+      "cost": 0.00035254
+    }
+  },
+  "total_cost": 0.00342783,
+  "errors": 0
+}
