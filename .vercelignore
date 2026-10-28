@@ -1,0 +1,12 @@
+.env
+.venv/
+__pycache__/
+outputs/
+results/
+tests/
+docs/
+expected/
+*.md
+requirements-dev.txt
+.env.local
+.vercel/
