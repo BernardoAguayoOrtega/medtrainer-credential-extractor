@@ -27,7 +27,7 @@ def main() -> None:
             continue
         raw = json.loads(path.read_text())
         result = normalize(raw, reference, window)
-        result["warnings"] = validate(result, raw, load_text_layer(Path("docs") / f"{path.stem}.pdf"))
+        result["warnings"] = validate(result, raw, load_text_layer((Path("docs") / f"{path.stem}.pdf").read_bytes(), ".pdf"))
         (dst / path.name).write_text(json.dumps(result, indent=2, ensure_ascii=False) + "\n")
         print(f"{path.stem}: {result['warnings'] or 'ok'}")
 

@@ -35,7 +35,7 @@ def run_batch(files, out_dir: Path, reference: date, model: str, window_days: in
     errors = 0
     for path in files:
         try:
-            result, usage = extract_document(path, reference, model, call=call, window_days=window_days)
+            result, usage = extract_document(path, reference, model=model, call=call, window_days=window_days)
         except Exception as exc:  # one bad document must not stop the batch
             result, usage = {"error": str(exc)}, {"cost": None}
             errors += 1

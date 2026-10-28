@@ -1,7 +1,7 @@
 from datetime import date
 from pathlib import Path
 
-from extractor.pipeline import extract_document
+from extractor.pipeline import extract_bytes, extract_document
 
 DOCS = Path(__file__).parent.parent / "docs"
 
@@ -36,6 +36,16 @@ def test_extract_document_adds_warnings_and_keeps_raw_answer():
 
     assert isinstance(result["warnings"], list)
     assert meta["raw"] == raw
+
+
+def test_extract_bytes_matches_extract_document():
+    call, _ = fake_call({"is_credential": True, "license_number": "PA20733", "expiration_date": "02/28/2026"})
+    data = (DOCS / "tx_02.pdf").read_bytes()
+
+    from_bytes, _ = extract_bytes(data, ".pdf", date(2026, 11, 1), model="m", call=call)
+    from_path, _ = extract_document(DOCS / "tx_02.pdf", date(2026, 11, 1), model="m", call=call)
+
+    assert from_bytes == from_path
 
 
 def test_pdf_renders_at_higher_resolution_than_baseline():

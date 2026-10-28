@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Credential Extractor</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --card: #ffffff; --text: #18202b; --muted: #5b6575; --border: #dde2ea;
+    --accent: #1f5fbf; --ok: #1d7a46; --warn: #a15c00; --bad: #b42318; --code: #f0f2f5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #11151b; --card: #1a2029; --text: #e6e9ee; --muted: #9aa4b2; --border: #2c3542;
+      --accent: #6aa1ff; --ok: #4cc283; --warn: #f0a640; --bad: #ff6b5e; --code: #141920;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 760px; margin: 0 auto; padding: 32px 16px 64px; }
+  h1 { font-size: 1.5rem; margin: 0 0 4px; }
+  p.lead { color: var(--muted); margin: 0 0 24px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+  .drop { border: 2px dashed var(--border); border-radius: 10px; padding: 28px 16px; text-align: center; cursor: pointer; transition: border-color .15s; }
+  .drop:hover, .drop.drag { border-color: var(--accent); }
+  .drop strong { color: var(--accent); }
+  .drop .file { margin-top: 8px; color: var(--muted); font-size: .9rem; word-break: break-all; }
+  input[type=file] { display: none; }
+  .row { display: flex; gap: 12px; align-items: end; flex-wrap: wrap; margin-top: 16px; }
+  label.field { display: flex; flex-direction: column; gap: 4px; font-size: .85rem; color: var(--muted); }
+  input[type=date] { font: inherit; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); }
+  button { font: inherit; font-weight: 600; padding: 9px 18px; border: 0; border-radius: 8px; background: var(--accent); color: #fff; cursor: pointer; }
+  button:disabled { opacity: .5; cursor: default; }
+  button.ghost { background: transparent; color: var(--accent); border: 1px solid var(--border); padding: 6px 12px; font-weight: 500; }
+  .hint { font-size: .8rem; color: var(--muted); margin-top: 12px; }
+  .status { display: inline-block; padding: 3px 10px; border-radius: 999px; font-weight: 600; font-size: .85rem; color: #fff; }
+  .s-valid { background: var(--ok); } .s-expiring_soon { background: var(--warn); } .s-expired { background: var(--bad); }
+  .s-no_expiration { background: var(--muted); } .s-none { background: var(--muted); }
+  table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+  td { padding: 7px 0; border-bottom: 1px solid var(--border); vertical-align: top; }
+  td:first-child { color: var(--muted); width: 42%; padding-right: 12px; }
+  td.null { color: var(--muted); font-style: italic; }
+  .warnings { margin-top: 14px; padding: 10px 14px; border-left: 3px solid var(--warn); background: var(--code); border-radius: 6px; }
+  .warnings ul { margin: 4px 0 0; padding-left: 18px; }
+  .error { color: var(--bad); font-weight: 600; }
+  pre { background: var(--code); border-radius: 8px; padding: 14px; overflow-x: auto; font-size: .82rem; margin: 10px 0 0; }
+  .meta { color: var(--muted); font-size: .82rem; margin-top: 10px; }
+  .head { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Credential Extractor</h1>
+  <p class="lead">Upload a medical license or certification (PDF or image) and get its key fields as JSON.</p>
+
+  <form class="card" id="form">
+    <label class="drop" id="drop" for="file">
+      <div><strong>Choose a file</strong> or drop it here</div>
+      <div class="file" id="fileName">PDF, PNG, JPG or WEBP, up to 10 MB</div>
+    </label>
+    <input type="file" id="file" name="file" accept=".pdf,.png,.jpg,.jpeg,.webp">
+    <div class="row">
+      <label class="field">Reference date for expiration status
+        <input type="date" id="refDate" name="reference_date">
+      </label>
+      <button type="submit" id="submit" disabled>Extract</button>
+    </div>
+    <p class="hint">Demo only: please do not upload real personal or health data. Documents are processed in memory and not stored. The eval uses reference date 2026-11-01.</p>
+  </form>
+
+  <section class="card" id="output" hidden>
+    <div class="head">
+      <strong id="summary"></strong>
+      <span class="status" id="status"></span>
+    </div>
+    <table id="fields"></table>
+    <div class="warnings" id="warnings" hidden><strong>Needs review</strong><ul id="warningList"></ul></div>
+    <div class="head" style="margin-top:16px">
+      <strong>JSON</strong>
+      <button type="button" class="ghost" id="copy">Copy</button>
+    </div>
+    <pre id="json"></pre>
+    <div class="meta" id="meta"></div>
+  </section>
+
+  <p class="error" id="error" hidden></p>
+</main>
+<script>
+  const $ = (id) => document.getElementById(id);
+  const FIELDS = ["is_credential", "holder_name", "credential_type", "license_number", "issuing_authority", "issue_date", "expiration_date", "expiration_status"];
+  const STATUS = { valid: "Valid", expiring_soon: "Expiring soon", expired: "Expired", no_expiration: "No expiration" };
+
+  $("refDate").value = new Date().toISOString().slice(0, 10);
+
+  function pick(file) {
+    if (!file) return;
+    const dt = new DataTransfer(); dt.items.add(file); $("file").files = dt.files;
+    $("fileName").textContent = file.name;
+    $("submit").disabled = false;
+  }
+  $("file").addEventListener("change", (e) => pick(e.target.files[0]));
+  ["dragover", "dragenter"].forEach((t) => $("drop").addEventListener(t, (e) => { e.preventDefault(); $("drop").classList.add("drag"); }));
+  ["dragleave", "drop"].forEach((t) => $("drop").addEventListener(t, () => $("drop").classList.remove("drag")));
+  $("drop").addEventListener("drop", (e) => { e.preventDefault(); pick(e.dataTransfer.files[0]); });
+
+  function cell(value) {
+    const td = document.createElement("td");
+    if (value === null || value === undefined) { td.textContent = "null"; td.className = "null"; }
+    else td.textContent = String(value);
+    return td;
+  }
+
+  function render(body) {
+    const r = body.result;
+    $("summary").textContent = r.is_credential ? "Credential found" : "Not a credential";
+    const s = r.expiration_status;
+    $("status").textContent = s ? STATUS[s] : "No status";
+    $("status").className = "status s-" + (s || "none");
+    $("fields").replaceChildren(...FIELDS.map((f) => {
+      const tr = document.createElement("tr");
+      const name = document.createElement("td"); name.textContent = f;
+      tr.append(name, cell(r[f])); return tr;
+    }));
+    $("warnings").hidden = !r.warnings.length;
+    $("warningList").replaceChildren(...r.warnings.map((w) => { const li = document.createElement("li"); li.textContent = w; return li; }));
+    $("json").textContent = JSON.stringify(r, null, 2);
+    const m = body.meta;
+    $("meta").textContent = `Model ${m.model} · reference date ${m.reference_date} · ${m.latency_s}s` + (m.cost_usd != null ? ` · $${m.cost_usd.toFixed(5)}` : "");
+    $("output").hidden = false;
+  }
+
+  $("form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    $("error").hidden = true;
+    $("submit").disabled = true; $("submit").textContent = "Extracting…";
+    try {
+      const res = await fetch("/api/extract", { method: "POST", body: new FormData($("form")) });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(body.detail || `Request failed (${res.status})`);
+      render(body);
+    } catch (err) {
+      $("output").hidden = true;
+      $("error").textContent = err.message; $("error").hidden = false;
+    } finally {
+      $("submit").disabled = false; $("submit").textContent = "Extract";
+    }
+  });
+
+  $("copy").addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText($("json").textContent); $("copy").textContent = "Copied"; }
+    catch { $("copy").textContent = "Copy failed"; }
+    setTimeout(() => ($("copy").textContent = "Copy"), 1500);
+  });
+</script>
+</body>
+</html>
