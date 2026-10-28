@@ -124,6 +124,7 @@ async def extract(request: Request, file: UploadFile = File(...), reference_date
             "model": MODEL,
             "reference_date": reference.isoformat(),
             "cost_usd": meta.get("cost"),
+            "pages_reviewed": meta.get("pages"),
             "latency_s": round(time.monotonic() - started, 2),
         },
     }

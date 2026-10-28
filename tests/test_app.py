@@ -13,8 +13,8 @@ DOCS = Path(__file__).parent.parent / "docs"
 def client(monkeypatch):
     calls = []
 
-    def fake_call(mime, image_b64, model):
-        calls.append(mime)
+    def fake_call(images, model):
+        calls.append(images[0][0])
         return {"is_credential": True, "holder_name": "X", "license_number": "PA20733", "expiration_date": "02/28/2026"}, {
             "cost": 0.0002
         }
@@ -48,6 +48,7 @@ def test_extract_returns_contract_fields_warnings_and_meta(client):
     assert isinstance(body["result"]["warnings"], list)
     assert body["meta"]["reference_date"] == "2026-11-01"
     assert body["meta"]["cost_usd"] == 0.0002
+    assert body["meta"]["pages_reviewed"] == 2  # tx_02 has two pages
 
 
 def test_reference_date_defaults_to_today(client):
@@ -117,7 +118,7 @@ def test_only_listed_samples_are_served(client, name):
 
 
 def test_model_failure_returns_502_with_a_safe_message(client, monkeypatch):
-    def broken(mime, image_b64, model):
+    def broken(images, model):
         raise RuntimeError("OpenRouter 500: secret details")
 
     monkeypatch.setattr(app_module, "call_model", broken)

@@ -49,7 +49,10 @@ Field rules:
 {label_rule}- issue_date, expiration_date: copy the date text exactly as printed. "Valid
   through", "expires" and "registered through" dates are expiration dates. Use
   null for expiration_date when the document has none.
-- The document may be rotated or skewed; read it in its natural orientation."""
+- The document may be rotated or skewed; read it in its natural orientation.
+- A document can have several pages (e.g. a cover letter, the credential and a
+  wallet card). Judge the document as a whole and extract the fields from the
+  page that holds the credential itself."""
 
 LABEL_RULE = """- For license_number, issue_date and expiration_date, first copy the label
   printed next to the value (e.g. "License #", "Date Issued", "Expires",
@@ -122,9 +125,14 @@ def fields_schema(labelled: bool = False) -> dict:
     }
 
 
+def _instruction(pages: int) -> str:
+    if pages == 1:
+        return "Extract the credential fields from this document."
+    return f"Extract the credential fields from this document. It has {pages} pages, in order."
+
+
 def build_payload(
-    mime: str,
-    image_b64: str,
+    images: list[tuple[str, str]],
     model: str,
     reasoning: bool = False,
     labelled: bool = False,
@@ -152,14 +160,11 @@ def build_payload(
             {
                 "role": "user",
                 "content": [
-                    {
-                        "type": "text",
-                        "text": "Extract the credential fields from this document.",
-                    },
-                    {
-                        "type": "image_url",
-                        "image_url": {"url": f"data:{mime};base64,{image_b64}"},
-                    },
+                    {"type": "text", "text": _instruction(len(images))},
+                    *(
+                        {"type": "image_url", "image_url": {"url": f"data:{mime};base64,{b64}"}}
+                        for mime, b64 in images
+                    ),
                 ],
             },
         ],
@@ -184,7 +189,7 @@ def parse_response(body: dict) -> tuple[dict, dict]:
 
 
 def call_openrouter(
-    mime: str, image_b64: str, model: str, labelled: bool = False
+    images: list[tuple[str, str]], model: str, labelled: bool = False
 ) -> tuple[dict, dict]:
     api_key = os.environ.get("OPENROUTER_API_KEY")
     if not api_key:
@@ -192,7 +197,7 @@ def call_openrouter(
     response = requests.post(
         OPENROUTER_URL,
         headers={"Authorization": f"Bearer {api_key}"},
-        json=build_payload(mime, image_b64, model, labelled=labelled),
+        json=build_payload(images, model, labelled=labelled),
         timeout=120,
     )
     if response.status_code >= 400:
